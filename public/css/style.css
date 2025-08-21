@@ -1,0 +1,98 @@
+body {
+  background-color: #f8f9fa;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+}
+
+.app-wrapper {
+  max-width: 960px;
+  width: 100%;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  display: flex;
+  background-color: #fff;
+}
+
+.sidebar {
+  min-width: 250px;
+  background-color: #343a40;
+  color: #fff;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.sidebar .nav-link {
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0.75rem 1rem;
+  border-radius: 0.25rem;
+}
+
+.sidebar .nav-link.active,
+.sidebar .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.sidebar .navbar-brand {
+    color: #fff;
+    font-size: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 1rem;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 2rem;
+}
+
+.card {
+  border: none;
+  box-shadow: 0 4px 6px rgba(0,0,0,.1);
+}
+
+.bid-item {
+  border-left: 5px solid #007bff;
+  transition: all 0.3s ease;
+}
+
+.bid-item:hover {
+  background-color: #e9ecef;
+}
+
+.series-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.series-item {
+  background-color: #e9ecef;
+  padding: 15px;
+  border-radius: 4px;
+  text-align: center;
+  text-decoration: none;
+  color: #333;
+  display: block;
+}
+
+.series-item:hover {
+  background-color: #dee2e6;
+}
+
+.bid-info {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.series-btn {
+    width: 100%;
+}

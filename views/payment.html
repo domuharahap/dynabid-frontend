@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynaBid - Payment</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="app-wrapper mt-5">
+        <div class="sidebar">
+            <a class="navbar-brand d-flex align-items-center mb-4" href="/home">
+                <img src="https://companieslogo.com/img/orig/DT-1480c5d6.svg" alt="Logo" width="50" height="50" class="d-inline-block align-text-top me-2">
+                <span class="fs-4">DynaBid</span>
+            </a>
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li class="nav-item">
+                    <a href="/home" class="nav-link">
+                        Home
+                    </a>
+                </li>
+                <li>
+                    <a href="/series" class="nav-link active" aria-current="page">
+                        Start Bidding
+                    </a>
+                </li>
+            </ul>
+            <div class="mt-auto">
+                <a href="/" class="btn btn-outline-light w-100" onclick="logOut()">Log Out</a>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <button class="btn btn-secondary mb-3" onclick="window.history.back()">Back</button>
+            <div class="card p-4">
+                <h2 class="card-title text-center mb-4">Confirm and Pay</h2>
+                <div id="message" class="mt-3 text-center"></div>
+                <div class="bid-info p-3 mb-3 bg-light rounded" id="bid-info-container">
+                    <p>You are about to place a bid for:</p>
+                    <p><strong>Series Number:</strong> <span id="display-bidding-number"></span></p>
+                    <p><strong>Bid Amount:</strong> USD <span id="display-bid-amount"></span></p>
+                    <p class="mt-3">A non-refundable participation fee of <strong>USD 2</strong> is required.</p>
+                </div>
+                <form id="payment-form">
+                    <input type="hidden" name="bidId" id="bid-id" value=""></input>
+                    <button type="submit" class="btn btn-primary w-100">Pay USD 2</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function logOut() {
+            alert('You have been logged out.');
+        }
+
+        // Global variables to store bid details
+        let bidId = null;
+        let biddingNumber = null;
+        let amount = null;
+        const userId = 1;
+
+        // Fetch bid details on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            bidId = urlParams.get('bidId');
+
+            const messageDiv = document.getElementById('message');
+            const bidInfoContainer = document.getElementById('bid-info-container');
+            const paymentForm = document.getElementById('payment-form');
+            const bidIdInput = document.getElementById('bid-id');
+
+            // Set initial state to hidden
+            if (bidInfoContainer) bidInfoContainer.style.display = 'none';
+            if (paymentForm) paymentForm.style.display = 'none';
+
+            if (!bidId) {
+                if (messageDiv) messageDiv.innerHTML = '<div class="alert alert-danger">Bid ID is missing.</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/bids/${bidId}`);
+                if (!response.ok) {
+                    throw new Error('Bid not found.');
+                }
+                const bid = await response.json();
+                
+                biddingNumber = bid.biddingNumber;
+                amount = bid.amount;
+                // You had a typo here: biId = bid.id;
+                // Corrected to: bidId = bid.id;
+                // However, bidId is already set from URL, so this line is redundant unless your backend returns a different ID.
+                // Assuming bid.id is the same as bidId from the URL.
+
+                if (document.getElementById('display-bidding-number')) {
+                    document.getElementById('display-bidding-number').innerText = biddingNumber;
+                }
+                if (document.getElementById('display-bid-amount')) {
+                    document.getElementById('display-bid-amount').innerText = amount;
+                }
+                
+                if (bidInfoContainer) bidInfoContainer.style.display = 'block';
+                if (paymentForm) paymentForm.style.display = 'block';
+                if (bidIdInput) bidIdInput.value = bidId;
+                
+            } catch (error) {
+                console.error('Error fetching bid details:', error);
+                if (messageDiv) messageDiv.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+            }
+        });
+
+        document.getElementById('payment-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const submittedBidId = formData.get('bidId');
+
+            const messageDiv = document.getElementById('message');
+
+            if (!submittedBidId) {
+                if (messageDiv) messageDiv.innerHTML = '<div class="alert alert-danger">Bid ID is missing from the form submission.</div>';
+                return;
+            }
+
+            const paymentData = {
+                bidId: submittedBidId,
+                userId: userId,
+                biddingNumber: biddingNumber,
+                amount: 2.0,
+                status: 'COMPLETED',
+                type: 'PARTICIPATION_FEE'
+            };
+
+            try {
+                const response = await fetch('/payments/confirm', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(paymentData)
+                });
+
+                if (response.ok) {
+                    window.location.href = `/success?biddingNumber=${biddingNumber}&amount=${amount}`;
+                } else {
+                    const error = await response.json();
+                    alert('Payment failed: ' + error.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred during payment.');
+            }
+        });
+    </script>
+</body>
+</html>
